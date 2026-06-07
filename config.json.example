@@ -2,7 +2,6 @@
     "swanlab_api_key": "YOUR_SWANLAB_KEY_HERE",
     "train_batch_size": 16,
     "dev_batch_size": 8,
-    "lr": 1e-5,
     "epochs": 15,
     "t_max": 20,
     "max_length": 128,
