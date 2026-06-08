@@ -1,55 +1,44 @@
 import os
-import torch
 from torch.utils.data import Dataset
-from transformers import BertTokenizer
 
-class testDataset(Dataset):
-    def __init__(self, file_path, max_len):
-        self.tokenizer = BertTokenizer.from_pretrained("bert-base-chinese")
+class TextDataset(Dataset):
+    def __init__(self, data_dir, filename, tokenizer, max_len=64):
+        self.tokenizer = tokenizer
         self.max_len = max_len
-        self.texts = []
-        self.labels = []
-        labels_raw = []
 
+        self.file_path = os.path.join(data_dir, filename)
+        self.texts, self.labels = self._load_data(self.file_path)
+
+    def _load_data(self, file_path):
+        texts, raw_labels = [], []
         with open(file_path, "r", encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
-                if not line:
-                    continue
+                if not line: continue
                 parts = line.split("_!_")
-                if len(parts) < 4:
-                    continue
-                self.texts.append(parts[3])
-                labels_raw.append(parts[1])
+                if len(parts) < 4: continue
 
-        unique_labels = sorted(list(set(labels_raw)))
-        label_map = {raw_id: idx for idx, raw_id in enumerate(unique_labels)}
+                texts.append(parts[3])
+                raw_labels.append(parts[1])
 
-        self.labels = [label_map[raw_id] for raw_id in labels_raw]
-
+        unique_labels = sorted(list(set(raw_labels)))
+        label_map = {label_name: idx for idx, label_name in enumerate(unique_labels)}
         self.num_classes = len(unique_labels)
+
+        labels = [label_map[l] for l in raw_labels]
+        return texts, labels
 
     def __len__(self):
         return len(self.texts)
 
     def __getitem__(self, index):
-        text = str(self.texts[index])
-        label = self.labels[index]
-
-        encoding = self.tokenizer.encode_plus(
-            text,
-            add_special_tokens=True,
-            max_length=self.max_len,
-            return_token_type_ids=False,
-            padding='max_length',
+        inputs = self.tokenizer(
+            str(self.texts[index]),
             truncation=True,
-            return_attention_mask=True,
-            return_tensors='pt',
+            max_length=self.max_len
         )
-
         return {
-            'text': text,
-            'input_ids': encoding['input_ids'].flatten(),
-            'attention_mask': encoding['attention_mask'].flatten(),
-            'label': torch.tensor(label, dtype=torch.long)
+            'input_ids':inputs['input_ids'],
+            'attention_mask':inputs['attention_mask'],
+            'labels':self.labels[index]
         }
