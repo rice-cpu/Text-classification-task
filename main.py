@@ -19,7 +19,7 @@ def main():
     if my_key:
         swanlab.login(api_key=my_key)
     else:
-        raise ValueError("config.json里找不到名'swanlab_api_key'")
+        raise ValueError("config.json里找不到'swanlab_api_key'")
 
     swanlab.init(
         project="Headline_Project_1",
@@ -33,14 +33,16 @@ def main():
         data_dir=config['data_dir'],
         filename="train_3k.txt",
         tokenizer=tokenizer,
-        max_len=config['max_length']
+        max_len=config['max_length'],
+        config = config
     )
 
     dev_dataset = TextDataset(
         data_dir=config['data_dir'],
         filename="dev_1k.txt",
         tokenizer=tokenizer,
-        max_len=config['max_length']
+        max_len=config['max_length'],
+        config=config
     )
     data_collator = DataCollatorWithPadding(tokenizer=tokenizer, return_tensors="pt")
 
@@ -59,7 +61,7 @@ def main():
     )
     model = berttextClassifier(num_classes=15).to(device)
     criterion = nn.CrossEntropyLoss()
-    optimizer = AdamW(model.parameters(), lr=config.get('learning_rate', 2e-5), eps=1e-8)
+    optimizer = AdamW(model.parameters(), lr=config('learning_rate', 2e-5), eps=1e-8)
 
     train_model(
         model=model,

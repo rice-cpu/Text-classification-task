@@ -2,30 +2,50 @@ import os
 from torch.utils.data import Dataset
 
 class TextDataset(Dataset):
-    def __init__(self, data_dir, filename, tokenizer, max_len=64):
+    def __init__(self, data_dir, filename, tokenizer, max_len=64, config=None):
         self.tokenizer = tokenizer
         self.max_len = max_len
+
+        if config:
+            self.is_keyword = config.get("is_keyword", False)
+            self.split_char = config.get("split_char", " ， ")
+        else:
+            self.is_keyword = False
+            self.split_char = " ，"
 
         self.file_path = os.path.join(data_dir, filename)
         self.texts, self.labels = self._load_data(self.file_path)
 
     def _load_data(self, file_path):
         texts, raw_labels = [], []
+
+        fixed_class_list = [
+            "100", "101", "102", "103", "104",
+            "106", "107", "108", "109", "110",
+            "112", "113", "114", "115", "116"
+        ]
+
         with open(file_path, "r", encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
                 if not line: continue
                 parts = line.split("_!_")
-                if len(parts) < 4: continue
+                try:
+                    title = parts[3]
+                    label = parts[1]
 
-                texts.append(parts[3])
-                raw_labels.append(parts[1])
+                    if self.is_keyword and len(parts) >= 5 and parts[4].strip():
+                        keywords = parts[4].strip()
+                        full_text = title + self.split_char + keywords
+                    else:
+                        full_text = title
 
-        unique_labels = sorted(list(set(raw_labels)))
-        label_map = {label_name: idx for idx, label_name in enumerate(unique_labels)}
-        self.num_classes = len(unique_labels)
+                    texts.append(full_text)
+                    raw_labels.append(label)
+                except IndexError:
+                    continue
 
-        labels = [label_map[l] for l in raw_labels]
+        labels = [fixed_class_list.index(l) for l in raw_labels if l in fixed_class_list]
         return texts, labels
 
     def __len__(self):
@@ -38,7 +58,7 @@ class TextDataset(Dataset):
             max_length=self.max_len
         )
         return {
-            'input_ids':inputs['input_ids'],
-            'attention_mask':inputs['attention_mask'],
-            'labels':self.labels[index]
+            'input_ids': inputs['input_ids'],
+            'attention_mask': inputs['attention_mask'],
+            'labels': self.labels[index]
         }
