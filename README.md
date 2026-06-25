@@ -16,6 +16,7 @@
     --- train.py                   # 核心训练循环脚本
     --- main.py                    # 整个项目的启动脚本
     --- README.md                  # 项目说明文档
+    --- requirements.txt           # 项目依赖描述文件
 ```
 ## 二、实验环境
 操作系统：Windows

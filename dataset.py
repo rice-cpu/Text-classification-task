@@ -18,13 +18,10 @@ class TextDataset(Dataset):
 
     def _load_data(self, file_path):
         texts, raw_labels = [], []
-
         fixed_class_list = [
             "100", "101", "102", "103", "104",
             "106", "107", "108", "109", "110",
-            "112", "113", "114", "115", "116"
-        ]
-
+            "112", "113", "114", "115", "116"]
         with open(file_path, "r", encoding="utf-8") as f:
             for line in f:
                 line = line.strip()

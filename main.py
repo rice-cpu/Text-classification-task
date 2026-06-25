@@ -61,7 +61,7 @@ def main():
     )
     model = berttextClassifier(num_classes=15).to(device)
     criterion = nn.CrossEntropyLoss()
-    optimizer = AdamW(model.parameters(), lr=config('learning_rate', 2e-5), eps=1e-8)
+    optimizer = AdamW(model.parameters(), lr=config.get('learning_rate', 2e-5), eps=1e-8)
 
     train_model(
         model=model,
