@@ -11,8 +11,11 @@ def inference():
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    tokenizer = BertTokenizer.from_pretrained("bert-base-chinese")
-    model = berttextClassifier(num_classes=15).to(device)
+    model_name = config.get("model_name", "bert-base-chinese")
+    num_classes = config.get("num_labels", 15)
+
+    tokenizer = BertTokenizer.from_pretrained(model_name)
+    model = berttextClassifier(model_name=model_name, num_classes=num_classes).to(device)
 
     checkpoint_path = "./checkpoints/best_checkpoint.pt"
     if os.path.exists(checkpoint_path):
@@ -24,16 +27,16 @@ def inference():
 
 
 def predict(text, model, tokenizer, device):
+    max_len = config.get("max_length", 64)
     inputs = tokenizer(
         str(text),
         padding='max_length',
-        max_length=64,
+        max_length=max_len,
         truncation=True,
         return_tensors="pt"
     )
 
     inputs = {k: v.to(device) for k, v in inputs.items()}
-    inputs.pop("token_type_ids", None)
 
     with torch.no_grad():
         outputs = model(**inputs)

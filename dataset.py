@@ -2,16 +2,16 @@ import os
 from torch.utils.data import Dataset
 
 class TextDataset(Dataset):
-    def __init__(self, data_dir, filename, tokenizer, max_len=64, config=None):
+    def __init__(self, data_dir, filename, tokenizer, config=None):
         self.tokenizer = tokenizer
-        self.max_len = max_len
+        self.config = config
 
         if config:
             self.is_keyword = config.get("is_keyword", False)
             self.split_char = config.get("split_char", " ， ")
         else:
             self.is_keyword = False
-            self.split_char = " ，"
+            self.split_char = " ， "
 
         self.file_path = os.path.join(data_dir, filename)
         self.texts, self.labels = self._load_data(self.file_path)
@@ -49,13 +49,16 @@ class TextDataset(Dataset):
         return len(self.texts)
 
     def __getitem__(self, index):
+        max_len = self.config.get("max_length", 64) if self.config else 64
         inputs = self.tokenizer(
             str(self.texts[index]),
             truncation=True,
-            max_length=self.max_len
+            max_length=max_len,
+            padding=False
         )
         return {
             'input_ids': inputs['input_ids'],
             'attention_mask': inputs['attention_mask'],
+            'token_type_ids': inputs.get('token_type_ids', [0] * len(inputs['input_ids'])),
             'labels': self.labels[index]
         }

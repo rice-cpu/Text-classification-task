@@ -1,5 +1,5 @@
-torch: 2.5.1+cu124
-transformers: 5.3.0
-swanlab: 0.7.19
-scikit-learn: 1.7.2
-tqdm: 4.67.3
+torch == 2.5.1+cu124
+transformers == 5.3.0
+swanlab == 0.7.19
+scikit-learn == 1.7.2
+tqdm == 4.67.3

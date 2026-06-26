@@ -4,9 +4,10 @@ import swanlab
 from tqdm import tqdm
 from sklearn.metrics import accuracy_score
 
-def train_model(model, train_loader, dev_loader, optimizer, criterion, device, epochs):
+def train_model(model, train_loader, dev_loader, optimizer, criterion, device, epochs, patience=3):
     best_acc = 0.0
     SAVE_DIR = "./checkpoints"
+    patience_counter =0
 
     for epoch in range(epochs):
         model.train()
@@ -45,6 +46,7 @@ def train_model(model, train_loader, dev_loader, optimizer, criterion, device, e
 
         if acc > best_acc:
             best_acc = acc
+            patience_counter =0
             save_path = os.path.join(SAVE_DIR, "best_checkpoint.pt")
             model_config_dict = model.bert.config.to_dict()
 
@@ -57,6 +59,12 @@ def train_model(model, train_loader, dev_loader, optimizer, criterion, device, e
             }
             os.makedirs(SAVE_DIR, exist_ok=True)
             torch.save(checkpoint_package, save_path)
+        else:
+            patience_counter +=1
+            print(f"验证集准确率未提升，已连续 {patience_counter}/{patience}个Epoch无优化。")
+            if patience_counter >= patience:
+                print(f"早停机制（Early Stopping），训练在第{epoch +1}个Epoch提前停止")
+                break
 
         swanlab.log({"train_loss": avg_loss, "val_accuracy": acc, "epoch": epoch + 1})
 

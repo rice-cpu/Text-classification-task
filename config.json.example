@@ -2,9 +2,12 @@
     "swanlab_api_key": "YOUR_SWANLAB_KEY_HERE",
     "train_batch_size": 16,
     "dev_batch_size": 8,
-    "epochs": 15,
-    "max_length": 64,
+    "epochs": 20,
+    "max_length": 128,
     "num_labels": 15,
-    "learning_rate": 2e-5,
-    "data_dir": "./data"
+    "learning_rate": 1e-5,
+    "data_dir": "./data",
+    "model_name": "bert-base-chinese",
+    "seed": 123,
+    "patience": 3
 }
