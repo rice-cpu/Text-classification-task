@@ -25,34 +25,6 @@ def set_seed(seed):
     torch.backends.cudnn.benchmark = False
 
 
-def my_collate_fn(batch):
-
-    input_ids = [item['input_ids'] for item in batch]
-    token_type_ids = [item['token_type_ids'] for item in batch]
-    attention_masks = [item['attention_mask'] for item in batch]
-    labels = [item['labels'] for item in batch]
-
-    max_batch_len = max(len(ids) for ids in input_ids)
-
-
-    padded_input_ids = []
-    padded_attention_masks = []
-    padded_token_type_ids = []
-
-    for ids, mask,tti in zip(input_ids, attention_masks,token_type_ids):
-        pad_len = max_batch_len - len(ids)
-        padded_input_ids.append(ids + [0] * pad_len)
-        padded_attention_masks.append(mask + [0] * pad_len)
-        padded_token_type_ids.append(tti+ [0] * pad_len)
-
-    return {
-        'input_ids': torch.tensor(padded_input_ids, dtype=torch.long),
-        'attention_mask': torch.tensor(padded_attention_masks, dtype=torch.long),
-        'token_type_ids': torch.tensor(padded_token_type_ids, dtype=torch.long),
-        'labels': torch.tensor(labels, dtype=torch.long)
-    }
-
-
 def main():
     CONFIG_PATH = "config.json"
     with open(CONFIG_PATH, "r", encoding="utf-8") as f:
@@ -93,14 +65,14 @@ def main():
         train_dataset,
         batch_size=config['train_batch_size'],
         shuffle=True,
-        collate_fn=my_collate_fn
+        collate_fn=TextDataset.collate_fn
     )
 
     dev_loader = DataLoader(
         dev_dataset,
         batch_size=config['dev_batch_size'],
         shuffle=False,
-        collate_fn=my_collate_fn
+        collate_fn=TextDataset.collate_fn
     )
 
     num_classes = config.get('num_labels', 15)

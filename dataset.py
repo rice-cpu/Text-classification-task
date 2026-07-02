@@ -1,4 +1,5 @@
 import os
+import torch
 from torch.utils.data import Dataset
 
 class TextDataset(Dataset):
@@ -18,10 +19,13 @@ class TextDataset(Dataset):
 
     def _load_data(self, file_path):
         texts, raw_labels = [], []
-        fixed_class_list = [
-            "100", "101", "102", "103", "104",
-            "106", "107", "108", "109", "110",
-            "112", "113", "114", "115", "116"]
+        if self.config and "class_list" in self.config:
+            fixed_class_list = self.config["class_list"]
+        else:
+            fixed_class_list = ["100", "101", "102", "103",
+                                "104", "106", "107", "108",
+                                "109", "110", "112", "113",
+                                "114", "115", "116"]
         with open(file_path, "r", encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
@@ -61,4 +65,30 @@ class TextDataset(Dataset):
             'attention_mask': inputs['attention_mask'],
             'token_type_ids': inputs.get('token_type_ids', [0] * len(inputs['input_ids'])),
             'labels': self.labels[index]
+        }
+    @staticmethod
+    def collate_fn(batch):
+
+        input_ids = [item['input_ids'] for item in batch]
+        token_type_ids = [item['token_type_ids'] for item in batch]
+        attention_masks = [item['attention_mask'] for item in batch]
+        labels = [item['labels'] for item in batch]
+
+        max_batch_len = max(len(ids) for ids in input_ids)
+
+        padded_input_ids = []
+        padded_attention_masks = []
+        padded_token_type_ids = []
+
+        for ids, mask, tti in zip(input_ids, attention_masks, token_type_ids):
+            pad_len = max_batch_len - len(ids)
+            padded_input_ids.append(ids + [0] * pad_len)
+            padded_attention_masks.append(mask + [0] * pad_len)
+            padded_token_type_ids.append(tti + [0] * pad_len)
+
+        return {
+            'input_ids': torch.tensor(padded_input_ids, dtype=torch.long),
+            'attention_mask': torch.tensor(padded_attention_masks, dtype=torch.long),
+            'token_type_ids': torch.tensor(padded_token_type_ids, dtype=torch.long),
+            'labels': torch.tensor(labels, dtype=torch.long)
         }

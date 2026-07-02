@@ -8,6 +8,10 @@
     "learning_rate": 1e-5,
     "data_dir": "./data",
     "model_name": "bert-base-chinese",
+    "is_keyword": true,
+    "class_list": ["100", "101", "102", "103", "104",
+                   "106", "107", "108", "109", "110",
+                   "112", "113", "114", "115", "116"],
     "seed": 123,
     "patience": 3
 }
