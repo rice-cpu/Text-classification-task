@@ -12,7 +12,7 @@
     |—— ---test_1k.txt             # 测试集（1064条新闻数据）
     --- config.json.example        # 配置文件
     --- model.py                   # 基于bert的模型定义
-    --- test.py               # 独立的测试脚本
+    --- test.py                    # 独立的测试脚本
     --- train.py                   # 核心训练循环脚本
     --- main.py                    # 整个项目的启动脚本
     --- README.md                  # 项目说明文档
