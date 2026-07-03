@@ -65,4 +65,4 @@
 ## 六、训练轨迹可视化
 以下为调参优化后的曲线：
 
-![img.png](image/img.png)
+![img.png](image/img01.png)

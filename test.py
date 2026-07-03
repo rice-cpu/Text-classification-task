@@ -39,7 +39,7 @@ def test_evaluation():
         test_dataset,
         batch_size=config.get('dev_batch_size', 32),
         shuffle=False,
-        collate_fn=TextDataset.collate_fn
+        collate_fn = lambda x: TextDataset.collate_fn(x, tokenizer)
     )
     all_preds, all_labels = [], []
     with torch.no_grad():

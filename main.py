@@ -65,14 +65,14 @@ def main():
         train_dataset,
         batch_size=config['train_batch_size'],
         shuffle=True,
-        collate_fn=TextDataset.collate_fn
+        collate_fn = lambda x: TextDataset.collate_fn(x, tokenizer)
     )
 
     dev_loader = DataLoader(
         dev_dataset,
         batch_size=config['dev_batch_size'],
         shuffle=False,
-        collate_fn=TextDataset.collate_fn
+        collate_fn=lambda x: TextDataset.collate_fn(x, tokenizer)
     )
 
     num_classes = config.get('num_labels', 15)

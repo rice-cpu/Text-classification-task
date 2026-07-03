@@ -67,28 +67,9 @@ class TextDataset(Dataset):
             'labels': self.labels[index]
         }
     @staticmethod
-    def collate_fn(batch):
-
-        input_ids = [item['input_ids'] for item in batch]
-        token_type_ids = [item['token_type_ids'] for item in batch]
-        attention_masks = [item['attention_mask'] for item in batch]
+    def collate_fn(batch,tokenizer):
         labels = [item['labels'] for item in batch]
-
-        max_batch_len = max(len(ids) for ids in input_ids)
-
-        padded_input_ids = []
-        padded_attention_masks = []
-        padded_token_type_ids = []
-
-        for ids, mask, tti in zip(input_ids, attention_masks, token_type_ids):
-            pad_len = max_batch_len - len(ids)
-            padded_input_ids.append(ids + [0] * pad_len)
-            padded_attention_masks.append(mask + [0] * pad_len)
-            padded_token_type_ids.append(tti + [0] * pad_len)
-
-        return {
-            'input_ids': torch.tensor(padded_input_ids, dtype=torch.long),
-            'attention_mask': torch.tensor(padded_attention_masks, dtype=torch.long),
-            'token_type_ids': torch.tensor(padded_token_type_ids, dtype=torch.long),
-            'labels': torch.tensor(labels, dtype=torch.long)
-        }
+        features = [{k: v for k, v in item.items() if k != 'labels'} for item in batch]
+        padded_features = tokenizer.pad(features,padding=True,return_tensors="pt")
+        padded_features['labels'] = torch.tensor(labels, dtype=torch.long)
+        return padded_features
